@@ -1,10 +1,11 @@
 # Spatial ctniche of multiple heart diseases
 
-Minimal public code for reproducing manuscript figures from the integrated single-nucleus and spatial transcriptomic analyses.
+Public figure-reproduction code for the integrated single-nucleus and spatial transcriptomic study.
 
 ## Contents
 
-- `plot_only/`: scripts that load processed results and reproduce the main and supplementary figures.
+- `plot_only/`: formatted scripts corresponding to the main and supplementary result figures.
+- `docs/FIGURE_CODE_MAP.md`: mapping between manuscript figures and plotting directories.
 - `config/`: portable R and Python path templates.
 - `environment.yml`, `requirements.txt`, and `R_packages.txt`: software dependencies.
 
@@ -14,8 +15,8 @@ Copy the example path files and replace the placeholder roots with locations ava
 
 ## Scope
 
-This repository intentionally excludes raw or processed expression matrices, clinical metadata, intermediate analysis objects, internal server paths, and generated figures. The spatial deconvolution used in the reported analyses was RCTD; cell2location was not used.
+This repository intentionally excludes raw or processed expression matrices, clinical metadata, intermediate analysis objects and generated figures. The spatial deconvolution used in the reported analyses was RCTD; cell2location was not used.
 
 ## Usage
 
-Run the relevant scripts under `plot_only/figure1` through `plot_only/figure6`. Supplementary plotting code is provided under `plot_only/supplementary`.
+Use `docs/FIGURE_CODE_MAP.md` to locate the scripts for each figure. Run the relevant scripts under `plot_only/figure1` through `plot_only/figure6`; supplementary plotting code is under `plot_only/supplementary`.

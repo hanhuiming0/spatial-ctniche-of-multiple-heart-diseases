@@ -31,9 +31,9 @@ x <- read.delim(INFILE, check.names = FALSE, stringsAsFactors = FALSE) %>%
     )
   )
 
-if (nrow(x) < 5) stop("显著GO条目不足5个")
+if (nrow(x) < 5) stop("<U+663E><U+8457>GO<U+6761><U+76EE><U+4E0D><U+8DB3>5<U+4E2A>")
 
-# 1. 基于GO本体结构计算Wang语义相似性
+# 1. <U+57FA><U+4E8E>GO<U+672C><U+4F53><U+7ED3><U+6784><U+8BA1><U+7B97>Wang<U+8BED><U+4E49><U+76F8><U+4F3C><U+6027>
 sem_data <- godata("org.Hs.eg.db", ont = "BP", computeIC = FALSE)
 sim <- mgoSim(x$ID, x$ID, semData = sem_data, measure = "Wang", combine = NULL)
 sim[is.na(sim)] <- 0
@@ -45,7 +45,7 @@ dist_mat[dist_mat < 0] <- 0
 d <- as.dist(dist_mat)
 hc <- hclust(d, method = "average")
 
-# 在合理范围内用平均silhouette选择大组数量，而不是固定手工分组。
+# <U+5728><U+5408><U+7406><U+8303><U+56F4><U+5185><U+7528><U+5E73><U+5747>silhouette<U+9009><U+62E9><U+5927><U+7EC4><U+6570><U+91CF><U+FF0C><U+800C><U+4E0D><U+662F><U+56FA><U+5B9A><U+624B><U+5DE5><U+5206><U+7EC4><U+3002>
 k_use <- K_CANDIDATES[K_CANDIDATES < nrow(x)]
 sil <- sapply(k_use, function(k) {
   cl <- cutree(hc, k = k)
@@ -54,13 +54,16 @@ sil <- sapply(k_use, function(k) {
 best_k <- if (length(sil) > 0 && any(is.finite(sil))) k_use[which.max(sil)] else 8L
 x$Functional_group_id <- cutree(hc, k = best_k)[x$ID]
 
-# 每组代表条目：兼顾组内中心性、显著性和富集基因数。
+# <U+6BCF><U+7EC4><U+4EE3><U+8868><U+6761><U+76EE><U+FF1A><U+517C><U+987E><U+7EC4><U+5185><U+4E2D><U+5FC3><U+6027><U+3001><U+663E><U+8457><U+6027><U+548C><U+5BCC><U+96C6><U+57FA><U+56E0><U+6570><U+3002>
 representatives <- bind_rows(lapply(sort(unique(x$Functional_group_id)), function(g) {
   idx <- which(x$Functional_group_id == g)
   centrality <- if (length(idx) == 1) 1 else rowMeans(sim[idx, idx, drop = FALSE])
-  zc <- as.numeric(scale(centrality)); zc[!is.finite(zc)] <- 0
-  zs <- as.numeric(scale(x$minus_log10_FDR[idx])); zs[!is.finite(zs)] <- 0
-  zn <- as.numeric(scale(log1p(x$Count[idx]))); zn[!is.finite(zn)] <- 0
+  zc <- as.numeric(scale(centrality))
+  zc[!is.finite(zc)] <- 0
+  zs <- as.numeric(scale(x$minus_log10_FDR[idx]))
+  zs[!is.finite(zs)] <- 0
+  zn <- as.numeric(scale(log1p(x$Count[idx])))
+  zn[!is.finite(zn)] <- 0
   score <- zc + 0.35 * zs + 0.20 * zn
   x[idx[which.max(score)], c("Functional_group_id", "ID", "Description")] %>%
     dplyr::rename(Representative_GO = ID, Functional_group = Description)
@@ -75,8 +78,8 @@ x <- x %>%
       levels = representatives %>% arrange(Functional_group_id) %>%
         transmute(z = paste0("G", Functional_group_id, ": ", Functional_group)) %>% pull(z)
     ),
-    # 将自动语义簇进一步归并为论文主图可解释的5个生物学大类。
-    # 该映射针对当前enrichG.8.txt；若输入结果改变，应重新核对代表条目。
+    # <U+5C06><U+81EA><U+52A8><U+8BED><U+4E49><U+7C07><U+8FDB><U+4E00><U+6B65><U+5F52><U+5E76><U+4E3A><U+8BBA><U+6587><U+4E3B><U+56FE><U+53EF><U+89E3><U+91CA><U+7684>5<U+4E2A><U+751F><U+7269><U+5B66><U+5927><U+7C7B><U+3002>
+    # <U+8BE5><U+6620><U+5C04><U+9488><U+5BF9><U+5F53><U+524D>enrichG.8.txt<U+FF1B><U+82E5><U+8F93><U+5165><U+7ED3><U+679C><U+6539><U+53D8><U+FF0C><U+5E94><U+91CD><U+65B0><U+6838><U+5BF9><U+4EE3><U+8868><U+6761><U+76EE><U+3002>
     Supergroup = case_when(
       Functional_group_id %in% c(1, 2, 3, 4) ~ "ECM, collagen and mesenchymal remodelling",
       Functional_group_id %in% c(5, 7, 8) ~ "TGF-beta and receptor signalling",
@@ -93,7 +96,7 @@ write.table(
   sep = "\t", row.names = FALSE, quote = FALSE
 )
 
-# 2. 大功能组概览图
+# 2. <U+5927><U+529F><U+80FD><U+7EC4><U+6982><U+89C8><U+56FE>
 group_summary <- x %>%
   group_by(Functional_group_id, Functional_group_label, Functional_group) %>%
   summarise(
@@ -105,7 +108,8 @@ group_summary <- x %>%
   )
 
 write.table(group_summary, paste0(OUT_PREFIX, "_group_summary.tsv"),
-            sep = "\t", row.names = FALSE, quote = FALSE)
+  sep = "\t", row.names = FALSE, quote = FALSE
+)
 
 supergroup_summary <- x %>%
   group_by(Supergroup) %>%
@@ -117,19 +121,27 @@ supergroup_summary <- x %>%
     .groups = "drop"
   )
 write.table(supergroup_summary, paste0(OUT_PREFIX, "_supergroup_summary.tsv"),
-            sep = "\t", row.names = FALSE, quote = FALSE)
+  sep = "\t", row.names = FALSE, quote = FALSE
+)
 
-p_super <- ggplot(supergroup_summary,
-                  aes(median_fold_enrichment,
-                      reorder(Supergroup, median_fold_enrichment))) +
+p_super <- ggplot(
+  supergroup_summary,
+  aes(
+    median_fold_enrichment,
+    reorder(Supergroup, median_fold_enrichment)
+  )
+) +
   geom_segment(aes(x = 0, xend = median_fold_enrichment, yend = Supergroup),
-               colour = "grey80", linewidth = 0.5) +
+    colour = "grey80", linewidth = 0.5
+  ) +
   geom_point(aes(size = n_terms, colour = -log10(best_FDR))) +
   scale_colour_gradient(low = "#4C78A8", high = "#B2182B") +
   scale_size_continuous(range = c(5, 13)) +
-  labs(title = "ctniche_8 major biological programmes",
-       x = "Median fold enrichment", y = NULL,
-       colour = expression(-log[10](best~FDR)), size = "GO terms") +
+  labs(
+    title = "ctniche_8 major biological programmes",
+    x = "Median fold enrichment", y = NULL,
+    colour = expression(-log[10](best ~ FDR)), size = "GO terms"
+  ) +
   theme_bw(base_size = 11) +
   theme(panel.grid.major.y = element_blank(), plot.title = element_text(face = "bold"))
 ggsave(paste0(OUT_PREFIX, "_supergroup_overview.pdf"), p_super, width = 10.5, height = 4.8)
@@ -139,23 +151,26 @@ p_group <- ggplot(
   aes(x = median_fold_enrichment, y = reorder(Functional_group_label, median_fold_enrichment))
 ) +
   geom_segment(aes(x = 0, xend = median_fold_enrichment, yend = Functional_group_label),
-               colour = "grey80", linewidth = 0.5) +
+    colour = "grey80", linewidth = 0.5
+  ) +
   geom_point(aes(size = n_terms, colour = -log10(best_FDR))) +
   scale_colour_gradient(low = "#4C78A8", high = "#B2182B") +
   scale_size_continuous(range = c(4, 12)) +
   labs(
     title = "ctniche_8 GOBP functional groups",
     x = "Median fold enrichment", y = NULL,
-    colour = expression(-log[10](best~FDR)), size = "GO terms"
+    colour = expression(-log[10](best ~ FDR)), size = "GO terms"
   ) +
   theme_bw(base_size = 10) +
   theme(panel.grid.major.y = element_blank(), plot.title = element_text(face = "bold"))
 
 ggsave(paste0(OUT_PREFIX, "_group_overview.pdf"), p_group, width = 10.5, height = 6.5)
 
-# 3. 所有224条功能的分页图：每个语义大组一页，绝不丢弃条目
-pdf(paste0(OUT_PREFIX, "_all_terms_by_group.pdf"), width = 12, height = 9,
-    onefile = TRUE)
+# 3. <U+6240><U+6709>224<U+6761><U+529F><U+80FD><U+7684><U+5206><U+9875><U+56FE><U+FF1A><U+6BCF><U+4E2A><U+8BED><U+4E49><U+5927><U+7EC4><U+4E00><U+9875><U+FF0C><U+7EDD><U+4E0D><U+4E22><U+5F03><U+6761><U+76EE>
+pdf(paste0(OUT_PREFIX, "_all_terms_by_group.pdf"),
+  width = 12, height = 9,
+  onefile = TRUE
+)
 for (g in sort(unique(x$Functional_group_id))) {
   z <- x %>%
     filter(Functional_group_id == g) %>%
@@ -164,7 +179,8 @@ for (g in sort(unique(x$Functional_group_id))) {
 
   p <- ggplot(z, aes(FoldEnrichment, Description_page)) +
     geom_segment(aes(x = 0, xend = FoldEnrichment, yend = Description_page),
-                 colour = "grey85", linewidth = 0.4) +
+      colour = "grey85", linewidth = 0.4
+    ) +
     geom_point(aes(size = Count, colour = minus_log10_FDR)) +
     scale_colour_gradient(low = "#4575B4", high = "#A50026") +
     scale_size_continuous(range = c(2.5, 9)) +
@@ -184,8 +200,8 @@ for (g in sort(unique(x$Functional_group_id))) {
 }
 dev.off()
 
-# 4. GO语义网络：节点=GO条目；边=Wang语义相似性>=阈值
-# 为避免224个标签互相覆盖，仅标注每组最中心/显著的前2条，所有节点仍保留。
+# 4. GO<U+8BED><U+4E49><U+7F51><U+7EDC><U+FF1A><U+8282><U+70B9>=GO<U+6761><U+76EE><U+FF1B><U+8FB9>=Wang<U+8BED><U+4E49><U+76F8><U+4F3C><U+6027>>=<U+9608><U+503C>
+# <U+4E3A><U+907F><U+514D>224<U+4E2A><U+6807><U+7B7E><U+4E92><U+76F8><U+8986><U+76D6><U+FF0C><U+4EC5><U+6807><U+6CE8><U+6BCF><U+7EC4><U+6700><U+4E2D><U+5FC3>/<U+663E><U+8457><U+7684><U+524D>2<U+6761><U+FF0C><U+6240><U+6709><U+8282><U+70B9><U+4ECD><U+4FDD><U+7559><U+3002>
 edge_idx <- which(upper.tri(sim) & sim >= NETWORK_SIM_CUTOFF, arr.ind = TRUE)
 edges <- data.frame(
   from = rownames(sim)[edge_idx[, 1]],
@@ -214,10 +230,14 @@ g <- graph_from_data_frame(edges, directed = FALSE, vertices = nodes)
 set.seed(20260826)
 p_network <- ggraph(g, layout = "fr") +
   geom_edge_link(aes(alpha = similarity), colour = "grey55", show.legend = FALSE) +
-  geom_node_point(aes(size = Count, colour = Supergroup,
-                      shape = minus_log10_FDR > median(minus_log10_FDR)), alpha = 0.88) +
-  geom_node_text(aes(label = plot_label), repel = TRUE, size = 2.6,
-                 max.overlaps = Inf, box.padding = 0.4, point.padding = 0.2) +
+  geom_node_point(aes(
+    size = Count, colour = Supergroup,
+    shape = minus_log10_FDR > median(minus_log10_FDR)
+  ), alpha = 0.88) +
+  geom_node_text(aes(label = plot_label),
+    repel = TRUE, size = 2.6,
+    max.overlaps = Inf, box.padding = 0.4, point.padding = 0.2
+  ) +
   scale_edge_alpha(range = c(0.08, 0.50)) +
   scale_size_continuous(range = c(2.2, 8), name = "Gene count") +
   scale_shape_manual(
@@ -238,12 +258,16 @@ p_network <- ggraph(g, layout = "fr") +
   theme(plot.title = element_text(face = "bold"), legend.position = "right")
 
 ggsave(paste0(OUT_PREFIX, "_semantic_network.pdf"), p_network,
-       width = 14, height = 11, limitsize = FALSE)
+  width = 14, height = 11, limitsize = FALSE
+)
 
-# 保存语义相似性和网络边，便于调整阈值而不重复计算。
+# <U+4FDD><U+5B58><U+8BED><U+4E49><U+76F8><U+4F3C><U+6027><U+548C><U+7F51><U+7EDC><U+8FB9><U+FF0C><U+4FBF><U+4E8E><U+8C03><U+6574><U+9608><U+503C><U+800C><U+4E0D><U+91CD><U+590D><U+8BA1><U+7B97><U+3002>
 saveRDS(sim, paste0(OUT_PREFIX, "_semantic_similarity_matrix.RDS"))
 write.table(edges, paste0(OUT_PREFIX, "_semantic_network_edges.tsv"),
-            sep = "\t", row.names = FALSE, quote = FALSE)
+  sep = "\t", row.names = FALSE, quote = FALSE
+)
 
-message("GO展示完成：", nrow(x), "条；自动语义大组：", best_k,
-        "；网络边：", nrow(edges))
+message(
+  "GO<U+5C55><U+793A><U+5B8C><U+6210><U+FF1A>", nrow(x), "<U+6761><U+FF1B><U+81EA><U+52A8><U+8BED><U+4E49><U+5927><U+7EC4><U+FF1A>", best_k,
+  "<U+FF1B><U+7F51><U+7EDC><U+8FB9><U+FF1A>", nrow(edges)
+)

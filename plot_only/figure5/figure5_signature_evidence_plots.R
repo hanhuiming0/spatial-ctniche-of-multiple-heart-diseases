@@ -1,4 +1,4 @@
-PROJECT_ROOT <- Sys.getenv('PROJECT_ROOT', unset = '.')
+PROJECT_ROOT <- Sys.getenv("PROJECT_ROOT", unset = ".")
 
 options(stringsAsFactors = FALSE)
 
@@ -9,7 +9,7 @@ suppressPackageStartupMessages({
 })
 
 args <- commandArgs(trailingOnly = TRUE)
-root <- if (length(args) >= 1) args[1] else file.path(PROJECT_ROOT, '3-结果与分析', '3-空间转录组', 'Figure5_ctniche8')
+root <- if (length(args) >= 1) args[1] else file.path(PROJECT_ROOT, "3-<U+7ED3><U+679C><U+4E0E><U+5206><U+6790>", "3-<U+7A7A><U+95F4><U+8F6C><U+5F55><U+7EC4>", "Figure5_ctniche8")
 in19 <- file.path(root, "19-5C_region_corrected_pseudobulk")
 in20 <- file.path(root, "20-5C_region_corrected_gene_integration")
 out <- file.path(root, "21-5C_region_corrected_signature_figures")
@@ -19,8 +19,10 @@ read_tsv <- function(x) read.delim(x, check.names = FALSE, quote = "", comment.c
 write_tsv <- function(x, name) write.table(x, file.path(out, name), sep = "\t", row.names = FALSE, quote = FALSE, na = "NA")
 save_plot <- function(p, stem, width, height) {
   ggsave(file.path(out, paste0(stem, ".pdf")), p, width = width, height = height, device = cairo_pdf)
-  ggsave(file.path(out, paste0(stem, ".png")), p, width = width, height = height,
-         dpi = 400, bg = "white", device = grDevices::png, type = "cairo")
+  ggsave(file.path(out, paste0(stem, ".png")), p,
+    width = width, height = height,
+    dpi = 400, bg = "white", device = grDevices::png, type = "cairo"
+  )
 }
 
 old <- read_tsv(file.path(in20, "20_03_original929_region_corrected_integrated_evidence.tsv"))
@@ -72,62 +74,85 @@ cols <- c(
 # Fig1: nested evidence sets, emphasizing analytical roles rather than replacement.
 set_counts <- tibble(
   set = factor(c("Original voom-limma", "Region-corrected edgeR", "Cross-method overlap", "LOO strict core"),
-               levels = rev(c("Original voom-limma", "Region-corrected edgeR", "Cross-method overlap", "LOO strict core"))),
+    levels = rev(c("Original voom-limma", "Region-corrected edgeR", "Cross-method overlap", "LOO strict core"))
+  ),
   n = c(length(old_genes), length(new_genes), length(overlap_genes), length(strict_genes)),
   label = c("929\noriginal discovery", "874\nregion-corrected replication", "759\ncross-method stable", "510\nLOO strict")
 )
 p1 <- ggplot(set_counts, aes(n, set, fill = set)) +
   geom_col(width = 0.68) +
   geom_text(aes(label = label), hjust = -0.08, size = 4.1, lineheight = .95) +
-  scale_fill_manual(values = c("Original voom-limma" = "#8DA0CB", "Region-corrected edgeR" = "#FC8D62",
-                               "Cross-method overlap" = "#66C2A5", "LOO strict core" = "#2E8B57"), guide = "none") +
+  scale_fill_manual(values = c(
+    "Original voom-limma" = "#8DA0CB", "Region-corrected edgeR" = "#FC8D62",
+    "Cross-method overlap" = "#66C2A5", "LOO strict core" = "#2E8B57"
+  ), guide = "none") +
   scale_x_continuous(expand = expansion(mult = c(0, .28))) +
-  labs(x = "Number of genes", y = NULL, title = "ctniche_8 signature evidence sets",
-       subtitle = "AMI-IZ, ICM-FZ and HCM; sample-by-niche paired pseudobulk") +
-  theme_classic(base_size = 12) + theme(axis.line.y = element_blank(), axis.ticks.y = element_blank())
+  labs(
+    x = "Number of genes", y = NULL, title = "ctniche_8 signature evidence sets",
+    subtitle = "AMI-IZ, ICM-FZ and HCM; sample-by-niche paired pseudobulk"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(axis.line.y = element_blank(), axis.ticks.y = element_blank())
 save_plot(p1, "21_Fig1_signature_evidence_sets", 8.2, 4.8)
 
 # Fig2: exact old/new partition.
-partition <- membership %>% count(recommended_set, name = "n") %>%
+partition <- membership %>%
+  count(recommended_set, name = "n") %>%
   mutate(recommended_set = factor(recommended_set,
-    levels = c("voom-limma only", "Cross-method stable", "Cross-method + LOO strict", "edgeR-new + LOO strict", "edgeR only")))
+    levels = c("voom-limma only", "Cross-method stable", "Cross-method + LOO strict", "edgeR-new + LOO strict", "edgeR only")
+  ))
 p2 <- ggplot(partition, aes(recommended_set, n, fill = recommended_set)) +
-  geom_col(width = .72) + geom_text(aes(label = n), vjust = -.35, fontface = "bold") +
+  geom_col(width = .72) +
+  geom_text(aes(label = n), vjust = -.35, fontface = "bold") +
   scale_fill_manual(values = cols, guide = "none") +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
-  labs(x = NULL, y = "Number of genes", title = "Cross-model membership and LOO stability",
-       subtitle = "The strict core contains both replicated and edgeR-new genes") +
-  theme_classic(base_size = 12) + theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(
+    x = NULL, y = "Number of genes", title = "Cross-model membership and LOO stability",
+    subtitle = "The strict core contains both replicated and edgeR-new genes"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
 save_plot(p2, "21_Fig2_cross_model_membership", 8.4, 5.2)
 
 # Fig3: disease-specific effect sizes of the edgeR shared set.
 hm <- new874 %>%
-  transmute(gene, AMI_IZ = logFC__AMI_IZ, ICM_FZ = logFC__ICM_FZ, HCM = logFC__HCM,
-            strict = gene %in% strict_genes) %>%
+  transmute(gene,
+    AMI_IZ = logFC__AMI_IZ, ICM_FZ = logFC__ICM_FZ, HCM = logFC__HCM,
+    strict = gene %in% strict_genes
+  ) %>%
   pivot_longer(c(AMI_IZ, ICM_FZ, HCM), names_to = "disease", values_to = "logFC") %>%
-  mutate(disease = factor(disease, c("AMI_IZ", "ICM_FZ", "HCM"), c("AMI-IZ", "ICM-FZ", "HCM")),
-         strict = factor(strict, c(FALSE, TRUE), c("Other shared genes", "LOO strict core")))
+  mutate(
+    disease = factor(disease, c("AMI_IZ", "ICM_FZ", "HCM"), c("AMI-IZ", "ICM-FZ", "HCM")),
+    strict = factor(strict, c(FALSE, TRUE), c("Other shared genes", "LOO strict core"))
+  )
 p3 <- ggplot(hm, aes(logFC, colour = disease, fill = disease)) +
   geom_density(alpha = .13, linewidth = .8) +
   geom_vline(xintercept = .1, linetype = 2, colour = "grey45") +
   facet_wrap(~strict, ncol = 1, scales = "free_y") +
   scale_colour_manual(values = c("AMI-IZ" = "#49c2d9", "ICM-FZ" = "#f59c76", "HCM" = "#fded95")) +
   scale_fill_manual(values = c("AMI-IZ" = "#49c2d9", "ICM-FZ" = "#f59c76", "HCM" = "#fded95")) +
-  labs(x = "Region-corrected pseudobulk logFC", y = "Density", colour = NULL, fill = NULL,
-       title = "Effect-size distributions across disease states",
-       subtitle = "ctniche_8 versus other niches within the matched disease region") +
-  theme_classic(base_size = 12) + theme(legend.position = "top")
+  labs(
+    x = "Region-corrected pseudobulk logFC", y = "Density", colour = NULL, fill = NULL,
+    title = "Effect-size distributions across disease states",
+    subtitle = "ctniche_8 versus other niches within the matched disease region"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "top")
 save_plot(p3, "21_Fig3_disease_logFC_distributions", 8.2, 6.4)
 
 # Fig4: leave-one-sample-out FDR support in each disease.
 loo <- new874 %>%
-  transmute(gene, strict = gene %in% strict_genes,
-            `AMI-IZ` = fraction_LOO_FDR05__AMI_IZ,
-            `ICM-FZ` = fraction_LOO_FDR05__ICM_FZ,
-            HCM = fraction_LOO_FDR05__HCM) %>%
+  transmute(gene,
+    strict = gene %in% strict_genes,
+    `AMI-IZ` = fraction_LOO_FDR05__AMI_IZ,
+    `ICM-FZ` = fraction_LOO_FDR05__ICM_FZ,
+    HCM = fraction_LOO_FDR05__HCM
+  ) %>%
   pivot_longer(c(`AMI-IZ`, `ICM-FZ`, HCM), names_to = "disease", values_to = "fraction") %>%
-  mutate(strict = factor(strict, c(FALSE, TRUE), c("Other shared genes", "LOO strict core")),
-         disease = factor(disease, c("AMI-IZ", "ICM-FZ", "HCM")))
+  mutate(
+    strict = factor(strict, c(FALSE, TRUE), c("Other shared genes", "LOO strict core")),
+    disease = factor(disease, c("AMI-IZ", "ICM-FZ", "HCM"))
+  )
 p4 <- ggplot(loo, aes(disease, fraction, fill = disease)) +
   geom_violin(scale = "width", trim = TRUE, alpha = .75, colour = "white") +
   geom_boxplot(width = .14, outlier.shape = NA, fill = "white", linewidth = .35) +
@@ -135,8 +160,10 @@ p4 <- ggplot(loo, aes(disease, fraction, fill = disease)) +
   facet_wrap(~strict, nrow = 1) +
   scale_fill_manual(values = c("AMI-IZ" = "#49c2d9", "ICM-FZ" = "#f59c76", "HCM" = "#fded95"), guide = "none") +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, .2)) +
-  labs(x = NULL, y = "Fraction of LOO runs with FDR < 0.05", title = "Leave-one-sample-out significance stability",
-       subtitle = "Dashed line indicates the 80% stability requirement") +
+  labs(
+    x = NULL, y = "Fraction of LOO runs with FDR < 0.05", title = "Leave-one-sample-out significance stability",
+    subtitle = "Dashed line indicates the 80% stability requirement"
+  ) +
   theme_classic(base_size = 12)
 save_plot(p4, "21_Fig4_LOO_FDR_stability", 8.5, 5.2)
 
@@ -147,10 +174,13 @@ p5 <- ggplot(pairdat, aes(logFC__AMI_IZ, logFC__ICM_FZ, colour = class, size = -
   geom_abline(slope = 1, intercept = 0, linetype = 2, colour = "grey55") +
   scale_colour_manual(values = c("Other shared genes" = "grey72", "LOO strict core" = "#2E8B57")) +
   scale_size_continuous(range = c(.5, 3.2), name = expression(-log[10]("HCM FDR"))) +
-  labs(x = "AMI-IZ logFC", y = "ICM-FZ logFC", colour = NULL,
-       title = "Cross-disease concordance of the region-corrected signature",
-       subtitle = "Point size represents independent HCM significance") +
-  theme_classic(base_size = 12) + theme(legend.position = "right")
+  labs(
+    x = "AMI-IZ logFC", y = "ICM-FZ logFC", colour = NULL,
+    title = "Cross-disease concordance of the region-corrected signature",
+    subtitle = "Point size represents independent HCM significance"
+  ) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "right")
 save_plot(p5, "21_Fig5_cross_disease_effect_concordance", 7.3, 6.2)
 
 summary_lines <- c(

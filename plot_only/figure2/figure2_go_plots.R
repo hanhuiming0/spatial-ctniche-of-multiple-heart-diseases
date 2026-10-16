@@ -6,9 +6,13 @@ suppressPackageStartupMessages({
 })
 
 args <- commandArgs(trailingOnly = TRUE)
-input_rds <- if (length(args) >= 1) args[1] else file.path(
-  PROJECT_ROOT, "3-结果与分析", "3-空间转录组", "2-ctniche", "5-功能", "enrichG_up1.RDS"
-)
+input_rds <- if (length(args) >= 1) {
+  args[1]
+} else {
+  file.path(
+    PROJECT_ROOT, "3-<U+7ED3><U+679C><U+4E0E><U+5206><U+6790>", "3-<U+7A7A><U+95F4><U+8F6C><U+5F55><U+7EC4>", "2-ctniche", "5-<U+529F><U+80FD>", "enrichG_up1.RDS"
+  )
+}
 output_file <- if (length(args) >= 2) args[2] else "figure2_ctniche_go_bp.pdf"
 
 enrichment <- readRDS(input_rds)

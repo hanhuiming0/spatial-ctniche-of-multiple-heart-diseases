@@ -28,8 +28,10 @@ p <- ggVennDiagram(
   scale_fill_gradient(low = "#F7F7F7", high = "#E68A8A") +
   labs(
     title = "Upregulated genes in ctniche_8 across disease states",
-    subtitle = paste0("ctniche_8 vs other niches; log2FC > ", MIN_LOGFC,
-                      ", FDR < ", MAX_FDR),
+    subtitle = paste0(
+      "ctniche_8 vs other niches; log2FC > ", MIN_LOGFC,
+      ", FDR < ", MAX_FDR
+    ),
     fill = "Gene count"
   ) +
   theme(
@@ -40,7 +42,7 @@ p <- ggVennDiagram(
 
 ggsave("5B_ctniche8_upregulated_DEG_venn.pdf", p, width = 7.5, height = 6.5)
 
-# 输出精确的7个韦恩区域及基因名称。
+# <U+8F93><U+51FA><U+7CBE><U+786E><U+7684>7<U+4E2A><U+97E6><U+6069><U+533A><U+57DF><U+53CA><U+57FA><U+56E0><U+540D><U+79F0><U+3002>
 all_genes <- sort(unique(unlist(up)))
 membership <- data.frame(
   gene = all_genes,
@@ -61,17 +63,22 @@ membership <- data.frame(
   )
 
 write.table(membership, "5B_ctniche8_upregulated_DEG_venn_membership.tsv",
-            sep = "\t", row.names = FALSE, quote = FALSE)
+  sep = "\t", row.names = FALSE, quote = FALSE
+)
 
-counts <- membership %>% count(region, name = "n_genes") %>%
+counts <- membership %>%
+  count(region, name = "n_genes") %>%
   bind_rows(data.frame(
     region = c("AMI-IZ total", "ICM-FZ total", "HCM total"),
     n_genes = c(length(up[["AMI-IZ"]]), length(up[["ICM-FZ"]]), length(up[["HCM"]]))
   ))
 write.table(counts, "5B_ctniche8_upregulated_DEG_venn_counts.tsv",
-            sep = "\t", row.names = FALSE, quote = FALSE)
+  sep = "\t", row.names = FALSE, quote = FALSE
+)
 
-message("AMI-IZ: ", length(up[["AMI-IZ"]]),
-        "; ICM-FZ: ", length(up[["ICM-FZ"]]),
-        "; HCM: ", length(up[["HCM"]]),
-        "; common: ", length(Reduce(intersect, up)))
+message(
+  "AMI-IZ: ", length(up[["AMI-IZ"]]),
+  "; ICM-FZ: ", length(up[["ICM-FZ"]]),
+  "; HCM: ", length(up[["HCM"]]),
+  "; common: ", length(Reduce(intersect, up))
+)

@@ -9,8 +9,8 @@ infile <- "5B_conserved_ctniche8_signature.tsv"
 stopifnot(file.exists(infile))
 x <- read.delim(infile, check.names = FALSE)
 
-# 只展示最稳定、最有区分度的核心基因，避免把1788个基因全部塞入主图。
-# 排序优先考虑三种疾病中最弱的效应量，而不是平均效应量，避免由HCM单独主导。
+# <U+53EA><U+5C55><U+793A><U+6700><U+7A33><U+5B9A><U+3001><U+6700><U+6709><U+533A><U+5206><U+5EA6><U+7684><U+6838><U+5FC3><U+57FA><U+56E0><U+FF0C><U+907F><U+514D><U+628A>1788<U+4E2A><U+57FA><U+56E0><U+5168><U+90E8><U+585E><U+5165><U+4E3B><U+56FE><U+3002>
+# <U+6392><U+5E8F><U+4F18><U+5148><U+8003><U+8651><U+4E09><U+79CD><U+75BE><U+75C5><U+4E2D><U+6700><U+5F31><U+7684><U+6548><U+5E94><U+91CF><U+FF0C><U+800C><U+4E0D><U+662F><U+5E73><U+5747><U+6548><U+5E94><U+91CF><U+FF0C><U+907F><U+514D><U+7531>HCM<U+5355><U+72EC><U+4E3B><U+5BFC><U+3002>
 N_SHOW <- 30
 core <- x %>%
   filter(
@@ -27,12 +27,14 @@ core <- x %>%
   arrange(desc(min_logFC_plot), max_FDR_plot) %>%
   slice_head(n = N_SHOW)
 
-if (nrow(core) == 0) stop("没有满足作图条件的保守基因")
+if (nrow(core) == 0) stop("<U+6CA1><U+6709><U+6EE1><U+8DB3><U+4F5C><U+56FE><U+6761><U+4EF6><U+7684><U+4FDD><U+5B88><U+57FA><U+56E0>")
 
 long <- core %>%
-  select(gene,
-         logFC_AMI_IZ, logFC_ICM_FZ, logFC_HCM,
-         FDR_AMI_IZ, FDR_ICM_FZ, FDR_HCM) %>%
+  select(
+    gene,
+    logFC_AMI_IZ, logFC_ICM_FZ, logFC_HCM,
+    FDR_AMI_IZ, FDR_ICM_FZ, FDR_HCM
+  ) %>%
   pivot_longer(
     cols = -gene,
     names_to = c("measure", "Disease"),
@@ -41,12 +43,16 @@ long <- core %>%
   ) %>%
   pivot_wider(names_from = measure, values_from = value) %>%
   mutate(
-    Disease = factor(Disease, levels = c("AMI_IZ", "ICM_FZ", "HCM"),
-                     labels = c("AMI-IZ", "ICM-FZ", "HCM")),
+    Disease = factor(Disease,
+      levels = c("AMI_IZ", "ICM_FZ", "HCM"),
+      labels = c("AMI-IZ", "ICM-FZ", "HCM")
+    ),
     minus_log10_FDR = pmin(-log10(pmax(FDR, 1e-300)), 20)
   )
 
-gene_order <- core %>% arrange(min_logFC_plot) %>% pull(gene)
+gene_order <- core %>%
+  arrange(min_logFC_plot) %>%
+  pull(gene)
 long$gene <- factor(long$gene, levels = gene_order)
 core$gene <- factor(core$gene, levels = gene_order)
 
@@ -57,8 +63,10 @@ p1 <- ggplot(long, aes(Disease, gene)) +
     midpoint = 0, name = "log2FC"
   ) +
   scale_size_continuous(range = c(1.5, 7), name = expression(-log[10](FDR))) +
-  labs(x = NULL, y = NULL,
-       title = "Conserved ctniche_8-associated genes across disease states") +
+  labs(
+    x = NULL, y = NULL,
+    title = "Conserved ctniche_8-associated genes across disease states"
+  ) +
   theme_bw(base_size = 11) +
   theme(
     panel.grid.major = element_line(colour = "grey90", linewidth = 0.3),
@@ -68,13 +76,19 @@ p1 <- ggplot(long, aes(Disease, gene)) +
   )
 
 p2 <- ggplot(core, aes(patient_positive_fraction, gene)) +
-  geom_segment(aes(x = 0.5, xend = patient_positive_fraction,
-                   y = gene, yend = gene), colour = "grey75") +
+  geom_segment(aes(
+    x = 0.5, xend = patient_positive_fraction,
+    y = gene, yend = gene
+  ), colour = "grey75") +
   geom_point(aes(colour = min_logFC_plot), size = 3) +
-  scale_x_continuous(limits = c(0.5, 1.02), breaks = c(0.5, 0.75, 1.0),
-                     labels = scales::percent_format(accuracy = 1)) +
-  scale_colour_gradient(low = "#FDAE61", high = "#A50026",
-                        name = "Minimum\nlog2FC") +
+  scale_x_continuous(
+    limits = c(0.5, 1.02), breaks = c(0.5, 0.75, 1.0),
+    labels = scales::percent_format(accuracy = 1)
+  ) +
+  scale_colour_gradient(
+    low = "#FDAE61", high = "#A50026",
+    name = "Minimum\nlog2FC"
+  ) +
   labs(x = "Patient pairs with positive change", y = NULL) +
   theme_bw(base_size = 11) +
   theme(
@@ -86,8 +100,10 @@ p2 <- ggplot(core, aes(patient_positive_fraction, gene)) +
 p <- p1 + p2 + plot_layout(widths = c(2.4, 1.2), guides = "collect")
 
 ggsave("5B_ctniche8_conserved_genes_bubble.pdf", p, width = 10.5, height = 9)
-ggsave("5B_ctniche8_conserved_genes_bubble.png", p, width = 10.5, height = 9,
-       dpi = 300, bg = "white")
+ggsave("5B_ctniche8_conserved_genes_bubble.png", p,
+  width = 10.5, height = 9,
+  dpi = 300, bg = "white"
+)
 
 write.table(
   core %>% arrange(desc(min_logFC_plot)),
