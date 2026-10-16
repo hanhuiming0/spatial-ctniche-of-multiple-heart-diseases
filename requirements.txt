@@ -1,0 +1,17 @@
+anndata
+cell2location
+commot
+hotspotsc
+liana
+matplotlib
+networkx
+numpy
+pandas
+Pillow
+scanpy
+scikit-learn
+scikit-misc
+scipy
+seaborn
+squidpy
+statsmodels

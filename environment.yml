@@ -1,0 +1,26 @@
+name: cardiac-spatial-niche
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - statsmodels
+  - networkx
+  - pillow
+  - scanpy
+  - anndata
+  - squidpy
+  - jupyterlab
+  - pip:
+      - cell2location
+      - commot
+      - liana
+      - hotspotsc
+      - scikit-misc

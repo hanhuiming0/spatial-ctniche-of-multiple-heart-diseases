@@ -1,0 +1,17 @@
+*.RDS
+*.rds
+*.h5ad
+*.h5
+*.loom
+*.pdf
+*.png
+*.tif
+*.tiff
+outputs/
+results/
+.Rhistory
+.RData
+__pycache__/
+*.pyc
+config/paths.R
+config/paths.py
