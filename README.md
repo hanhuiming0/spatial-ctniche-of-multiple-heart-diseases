@@ -4,7 +4,7 @@ Public figure-reproduction code for the integrated single-nucleus and spatial tr
 
 ## Contents
 
-- `plot_only/`: formatted scripts corresponding to the main and supplementary result figures.
+- `plot/`: formatted scripts corresponding to the main and supplementary result figures.
 - `docs/FIGURE_CODE_MAP.md`: mapping between manuscript figures and plotting directories.
 - `config/`: portable R and Python path templates.
 - `environment.yml`, `requirements.txt`, and `R_packages.txt`: software dependencies.
@@ -19,4 +19,4 @@ This repository intentionally excludes raw or processed expression matrices, cli
 
 ## Usage
 
-Use `docs/FIGURE_CODE_MAP.md` to locate the scripts for each figure. Run the relevant scripts under `plot_only/figure1` through `plot_only/figure6`; supplementary plotting code is under `plot_only/supplementary`.
+Use `docs/FIGURE_CODE_MAP.md` to locate the scripts for each figure. Run the relevant scripts under `plot/figure1` through `plot/figure6`; supplementary plotting code is under `plot/supplementary`.
